@@ -341,7 +341,7 @@ void TracePixel::operator()(DBL x, DBL y, DBL width, DBL height, RGBTColour& col
 bool TracePixel::CreateCameraRay(Ray& ray, DBL x, DBL y, DBL width, DBL height, size_t ray_number)
 {
     DBL x0 = 0.0, y0 = 0.0;
-    DBL cx, sx, cy, sy, ty, rad, phi;
+    DBL cx, sx, cy, sy, ty, rad2, rad, phi;
     Vector3d V1;
     TRANSFORM Trans;
 
@@ -402,19 +402,26 @@ bool TracePixel::CreateCameraRay(Ray& ray, DBL x, DBL y, DBL width, DBL height, 
             x0 *= cameraLengthRight;
             y0 *= cameraLengthUp;
 
-            rad = sqrt(x0 * x0 + y0 * y0);
-
+            rad2 = x0 * x0 + y0 * y0;            
             // If the pixel lies outside the unit circle no ray is traced.
-
-            if(rad > 1.0)
+            if(rad2 > 1.0)
+            {
                 return false;
+            }
 
-            if(rad == 0.0)
+            if(rad2 == 0.0)
+            {
+                rad = 0.0;
                 phi = 0.0;
-            else if(x0 < 0.0)
-                phi = M_PI - asin(y0 / rad);
+            }
             else
-                phi = asin(y0 / rad);
+            {
+                rad = sqrt(rad2);
+                if(x0 < 0.0)
+                    phi = M_PI - asin(y0 / rad);
+                else
+                    phi = asin(y0 / rad);
+            }
 
             // Get spherical coordinates.
             x0 = phi;
